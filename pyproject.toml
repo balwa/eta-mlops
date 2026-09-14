@@ -1,0 +1,43 @@
+# MLOps course — student environment (Apple Silicon M2/16 GB primary target; Linux x86_64 also resolved)
+# Install once, pre-weekend:  uv python install 3.12 && uv sync --extra apple
+# Floors below are the versions that resolved on 2026-09-12; uv.lock is the real pin.
+[project]
+name = "mlops-course"
+version = "2026.1"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+  # data layer — L5, L6, L17, L18
+  "pandas>=3.0", "polars>=1.44", "duckdb>=1.5", "pyarrow>=25",
+  # contracts — L3, L10
+  "pandera>=0.33",
+  # modeling — everywhere
+  "scikit-learn>=1.9", "lightgbm>=4.7", "imbalanced-learn>=0.14",
+  # tracking + registry + GenAI tracing — L11, L16, L19, L21, L22
+  "mlflow>=3.16",
+  # eval + monitoring — L12, L17, L18, L22
+  "evidently>=0.7.23", "pytest>=9.1", "prometheus-client>=0.26",
+  # serving — L1, L6, L13, L15, L18, L20, L22
+  "fastapi>=0.141", "uvicorn[standard]>=0.52", "httpx>=0.27",
+  # compression — L14, L15
+  "onnx>=1.22", "onnxruntime>=1.30", "skl2onnx>=1.20", "torch>=2.14",
+  # orchestration — L19, L21
+  "dagster>=1.13", "dagster-webserver>=1.13",
+  # LLM layer — L8 (labeler), L22
+  "openai>=3.13", "mcp>=2.2", "langfuse>=4.15", "psycopg[binary]>=3.3",
+  # notebooks + plots
+  "jupyterlab>=4.6", "ipykernel>=6.29", "matplotlib>=3.8",
+]
+
+[project.optional-dependencies]
+# Apple Silicon only — L14 LLM quantization on the student's own machine
+apple = ["mlx-lm>=0.31; sys_platform == 'darwin' and platform_machine == 'arm64'"]
+# Optional browser UI on /ui, post-L15. Not needed for any of the 22 lectures;
+# `uv sync` without --extra ui leaves the service byte-identical.
+ui = ["gradio>=6.27"]
+
+[tool.uv]
+# Resolve for exactly the two machines this course runs on.
+environments = [
+  "sys_platform == 'darwin' and platform_machine == 'arm64'",
+  "sys_platform == 'linux' and platform_machine == 'x86_64'",
+]

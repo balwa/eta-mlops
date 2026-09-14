@@ -1,0 +1,15 @@
+# generated — everyone rebuilds these from the seed, nobody commits them
+data/
+models/
+mlflow.db
+mlruns/
+.run/
+logs/*.png
+!logs/.gitkeep
+
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ipynb_checkpoints/
+.DS_Store
