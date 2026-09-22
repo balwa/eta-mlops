@@ -13,6 +13,12 @@ a shadow router and an MCP interface — and it is your code.
 Do this at home, before the weekend. See `SETUP.md` for the full
 Apple Silicon instructions, or the prep PDF you were sent.
 
+First install libomp, that is required for LightGBM.
+
+```bash
+brew install libomp
+```
+
 ```bash
 uv python install 3.12
 uv sync --extra apple          # drop --extra apple on Linux
