@@ -6,6 +6,9 @@ a shadow router and an MCP interface — and it is your code.
 
 **Weekend One covers L1–L12.** Everything here is built for that.
 
+**Class handouts** — one PDF per activity, step by step — are in
+[`handouts/`](handouts/). Open the one for the slot we are doing.
+
 ---
 
 ## Setup
@@ -63,6 +66,17 @@ curl -s -X POST localhost:8000/predict \
 
 `scripts/serve.sh start | stop | restart | status | logs`
 
+Shortcut for one prediction, without typing the long curl:
+
+```bash
+scripts/predict.sh R0042             # restaurant R0042, 3 items, rain
+scripts/predict.sh R0042 5 clear     # restaurant, items, weather
+```
+
+**One service at a time.** If you have two copies of this repo, only start the
+service from one of them. `serve.sh start` now refuses to start when port 8000
+is already taken, and tells you which folder the other one is running from.
+
 ### Optional: a browser UI
 
 ```bash
@@ -83,20 +97,23 @@ identically.
 Each slot leaves one file in this repo that wasn't there when it began. The
 test tells you when you're done.
 
-| # | file | test |
-|---|---|---|
-| 1 | `logs/silent_failure.md` | `pytest tests/test_slot01.py` |
-| 2 | `baseline_rules.py` | `pytest tests/test_slot02.py` |
-| 3 | `label_fn.py` | `pytest tests/test_slot03.py` |
-| 4 | `loss_sweep.py` | `pytest tests/test_slot04.py` |
-| 5 | `format_bench.py` | `pytest tests/test_slot05.py` |
-| 6 | `freshness_check.py` | `pytest tests/test_slot06.py` |
-| 7 | `sampling_compare.py` | `pytest tests/test_slot07.py` |
-| 8 | `imbalance.py` | `pytest tests/test_slot08.py` |
-| 9 | `features.py` | `pytest tests/test_slot09.py` |
-| 10 | `leakage_audit.py` | `pytest tests/test_slot10.py` |
-| 11 | `track.py` | `pytest tests/test_slot11.py` |
-| 12 | `test_model.py` | `pytest tests/test_slot12.py` |
+Each file has a `TODO` for you to write, and a ready-made `__main__` that
+runs the experiment with your code. Run it with `uv run python <file>`.
+
+| # | file | test | handout |
+|---|---|---|---|
+| 1 | `logs/silent_failure.md` | `pytest tests/test_slot01.py` | `handouts/slot01.pdf` |
+| 2 | `baseline_rules.py` | `pytest tests/test_slot02.py` | `handouts/slot02.pdf` |
+| 3 | `label_fn.py` | `pytest tests/test_slot03.py` | `handouts/slot03.pdf` |
+| 4 | `loss_sweep.py` | `pytest tests/test_slot04.py` | `handouts/slot04.pdf` |
+| 5 | `format_bench.py` | `pytest tests/test_slot05.py` | `handouts/slot05.pdf` |
+| 6 | `freshness_check.py` | `pytest tests/test_slot06.py` | `handouts/slot06.pdf` |
+| 7 | `sampling_compare.py` | `pytest tests/test_slot07.py` | `handouts/slot07.pdf` |
+| 8 | `imbalance.py` | `pytest tests/test_slot08.py` | `handouts/slot08.pdf` |
+| 9 | `features.py` | `pytest tests/test_slot09.py` | `handouts/slot09.pdf` |
+| 10 | `leakage_audit.py` | `pytest tests/test_slot10.py` | `handouts/slot10.pdf` |
+| 11 | `track.py` | `pytest tests/test_slot11.py` | `handouts/slot11.pdf` |
+| 12 | `test_model.py` | `pytest tests/test_slot12.py` | `handouts/slot12.pdf` |
 
 ```bash
 make test        # all of them
@@ -120,8 +137,9 @@ eta/          the shipped library — you read it, you don't edit it
   corrupt.py      one command to break it in four different ways
 
 notebooks/    leak_hunt.ipynb (slot 10)
-scripts/      serve.sh
+scripts/      serve.sh, predict.sh, hint_slot03.py, slice_table.py
 tests/        one test file per slot
+handouts/     one PDF per slot, plus setup
 ```
 
 ---
@@ -144,6 +162,8 @@ make clean    delete everything generated
 2. `make all` — rebuild the data and model from the seed
 3. `uv run python -m eta.corrupt restore` — undo a corruption from slot 1 or 6
 4. `scripts/serve.sh restart` — the service caches the feature store at startup
+5. `port 8000 is already in use` — another service is running, maybe from a
+   different folder. Run the `kill <pid>` it prints, then `make serve` again.
 
 Never `pip install` into this environment. `uv sync` reads `uv.lock`, which is
 why everyone has the same versions.

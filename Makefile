@@ -1,5 +1,5 @@
 # One command per thing. `make` alone builds everything from scratch.
-.PHONY: all data model serve stop verify test clean
+.PHONY: all data model serve stop verify handouts test clean
 
 all: data model
 	@echo "ready. now: make serve"
@@ -26,3 +26,6 @@ test:
 
 clean:
 	rm -rf data models mlflow.db mlruns .run logs/*.png
+
+handouts:
+	uv run --with markdown python handouts/build.py

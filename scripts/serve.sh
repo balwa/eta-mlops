@@ -12,6 +12,24 @@ start() {
   if [ -f "$PID" ] && kill -0 "$(cat "$PID")" 2>/dev/null; then
     echo "already running (pid $(cat "$PID"))"; return
   fi
+  # Someone else already owns the port — usually a service started from a
+  # different folder (another clone of this repo). Without this check the
+  # health poll below would happily talk to THAT server, print "up", and every
+  # later corrupt / reload would edit this folder's store while curl kept
+  # hitting the other one.
+  local owner=""
+  command -v lsof >/dev/null 2>&1 && owner=$(lsof -ti tcp:"$PORT" -sTCP:LISTEN 2>/dev/null | head -1 || true)
+  if [ -n "$owner" ] || curl -sf "localhost:$PORT/health" >/dev/null 2>&1; then
+    echo "port $PORT is already in use by another program — NOT starting."
+    if [ -n "$owner" ]; then
+      local where
+      where=$(lsof -a -p "$owner" -d cwd -Fn 2>/dev/null | sed -n 's/^n//p' | head -1 || true)
+      echo "  pid $owner, started from: ${where:-unknown folder}"
+      echo "  stop it with:   kill $owner"
+    fi
+    echo "  or use another port:   PORT=8001 scripts/serve.sh start"
+    exit 1
+  fi
   # Detach so the server outlives this shell. setsid is GNU-only — macOS
   # doesn't ship it — so use it when it's there and fall back to nohup alone.
   local cmd=(.venv/bin/python -m uvicorn eta.service:app --port "$PORT")
@@ -22,6 +40,10 @@ start() {
   # imports gradio and builds the Blocks before it answers /health.
   for _ in $(seq 1 120); do
     sleep 0.5
+    if ! kill -0 "$(cat "$PID")" 2>/dev/null; then
+      rm -f "$PID"
+      echo "service exited during startup — see $LOG"; tail -20 "$LOG"; exit 1
+    fi
     if curl -sf "localhost:$PORT/health" >/dev/null 2>&1; then
       echo "up on :$PORT (pid $(cat "$PID"))"; return
     fi
